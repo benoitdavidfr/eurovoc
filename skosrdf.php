@@ -74,7 +74,7 @@ if ($option == 'ttl') {
 
 // permet de simplifier une ressource en utilisant des raccourcis à la Turtle pour faciliter la lecture
 class Context {
-  protected array $prefixes=[];
+  public array $prefixes=[];
   
   function __construct(array $prefixes) {
     $this->prefixes = $prefixes;
@@ -133,15 +133,115 @@ if ($option == 'yamlld') { // Affichage Yaml à la JSON-LD en mettant les URI en
   die();
 }
 
+/*function notNull(array $array): array {
+  $a = [];
+  foreach ($array as $k => $v)
+    if ($v !== null)
+      $a[$k] = $v;
+  return $a;
+}*/
+
 if ($option == 'yamlskos') {
   require_once __DIR__.'/yamlskos.inc.php';
+  $prf = [
+    'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+    'skos' => 'http://www.w3.org/2004/02/skos/core#',
+  ];
   YamlSkos::$titles = [
     'fr'=> "EuroVoc, thésaurus multilingue de l'Union européenne",
     'en'=> "EuroVoc, the EU's multilingual thesaurus",
   ];
   foreach ($graph as $uri => $resource) {
     $id = substr($uri, strlen('http://eurovoc.europa.eu/'));
-    echo Yaml::dump([$id => $resource]);
-    die();
+    if ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]ConceptScheme") { // construction des ConceptScheme
+      unset($resource["$prf[rdf]type"]);
+      echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+      YamlSkos::$schemes[$id]['domain'] = [];
+      foreach ($resource["$prf[skos]prefLabel"] as $v)
+        YamlSkos::$schemes[$id]['prefLabel'][$v['lang']] = $v['value'];
+      unset($resource["$prf[skos]prefLabel"]);
+      YamlSkos::$schemes[$id]['hasTopConcept'] = [];
+      if (isset($resource["$prf[skos]notation"])) {
+        foreach ($resource["$prf[skos]notation"] as $v)
+          YamlSkos::$schemes[$id]['notation'][] = $v['value'];
+        unset($resource["$prf[skos]notation"]);
+      }
+      if ($resource) {
+        //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+        echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
+      }
+      echo Yaml::dump(['schemes'=> [$id => YamlSkos::$schemes[$id]]], 4, 2);
+
+      /*
+        100166:
+          domain:
+            - 100142
+          prefLabel:
+            fr: 0421 Parlement
+            en: 0421 parliament
+          hasTopConcept:
+            - 2246
+            - 41
+            - 2242
+            - 3232
+            - 53
+          notation:
+            - 0421
+      */
+      //die();
+    }
+    elseif ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]Concept") { // construction des concepts
+      //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+      unset($resource["$prf[rdf]type"]);
+      YamlSkos::$concepts[$id] = [];
+      if (isset($resource["$prf[skos]inScheme"])) {
+        foreach ($resource["$prf[skos]inScheme"] as $v)
+          YamlSkos::$concepts[$id]['inScheme'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+        unset($resource["$prf[skos]inScheme"]);
+      }
+      if (isset($resource["$prf[skos]topConceptOf"])) {
+        foreach ($resource["$prf[skos]topConceptOf"] as $v)
+          YamlSkos::$concepts[$id]['topConceptOf'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+        unset($resource["$prf[skos]topConceptOf"]);
+      }
+      // Le champ pour lequel il ne peut y avoir qu'un littéral par langue
+      if (isset($resource["$prf[skos]prefLabel"])) {
+        foreach ($resource["$prf[skos]prefLabel"] as $v)
+          YamlSkos::$concepts[$id]['prefLabel'][$v['lang']] = $v['value'];
+        unset($resource["$prf[skos]prefLabel"]);
+      }
+      // Les champs pour lesquels il peut y avoir plusieurs littéraux par langue
+      foreach (['altLabel','definition','scopeNote','editorialNote','changeNote','historyNote'] as $labelNote) {
+        if (isset($resource["$prf[skos]$labelNote"])) {
+          foreach ($resource["$prf[skos]$labelNote"] as $v)
+            YamlSkos::$concepts[$id][$labelNote][$v['lang']][] = $v['value'];
+          unset($resource["$prf[skos]$labelNote"]);
+        }
+      }
+      // Les relations
+      foreach (['broader','narrower','related'] as $labelLink) {
+        if (isset($resource["$prf[skos]$labelLink"])) {
+          foreach ($resource["$prf[skos]$labelLink"] as $v)
+            YamlSkos::$concepts[$id][$labelLink][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+          unset($resource["$prf[skos]$labelLink"]);
+        }
+      }
+      if (isset($resource["$prf[skos]notation"])) {
+        foreach ($resource["$prf[skos]notation"] as $v)
+          YamlSkos::$concepts[$id]['notation'][] = $v['value'];
+        unset($resource["$prf[skos]notation"]);
+      }
+      if ($resource) {
+        echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+        echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
+      }
+      //echo Yaml::dump(['concepts'=> [$id => YamlSkos::$concepts[$id]]], 4, 2);
+    }
+    else {
+      echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+      die();
+    }
+    //echo Yaml::dump([$id => $resource], 3, 2);
+    //die();
   }
 }
