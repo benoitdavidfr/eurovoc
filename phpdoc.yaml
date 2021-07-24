@@ -1,6 +1,10 @@
 title: EuroVoc
 path: /georef/eurovoc
 doc: |
+  L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation d'EuroVoc.
+  1er sujet: celui de son téléchargement et sa structuration pour différentes exploitations.
+  2ème sujet: visualisation et recherche d'un concept
+
   Logique de chargement.
   Pour stocker EuroVoc, j'utilise une structure simplifiée en Yaml, que j'appelle YamlSkos, définie par un schéma JSON.
   J'avais rempli cette structure il y a qqs temps mais je n'ai pas capitalisé la méthode.
