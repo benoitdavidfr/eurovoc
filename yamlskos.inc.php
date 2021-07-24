@@ -3,7 +3,7 @@
 name:  yamlskos.inc.php
 title: yamlskos.inc.php - chargement et affichage d'un YamlSkos
 doc: |
-  Structuration Php d'un thésaurus comme EuroVoc.
+  Structuration Php d'un thésaurus comme EuroVoc disponible en YamlSkos.
   Le thésaurus peut être affiché dans différentes langues ; le paramètre GET définit la langue choisie.
   2 options sont définies et sont passées dans le paramètre GET options comme liste de chaines:
     - 'toc' permet de n'afficher que la table des matières, cad les labels des domaines et des schemes
