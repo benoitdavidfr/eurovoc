@@ -1,0 +1,23 @@
+title: EuroVoc
+path: /georef/eurovoc
+doc: |
+  Logique de chargement.
+  Pour stocker EuroVoc, j'utilise une structure simplifiée en Yaml, que j'appelle YamlSkos, définie par un schéma JSON.
+  J'avais rempli cette structure il y a qqs temps mais je n'ai pas capitalisé la méthode.
+  C'est le fichier eurovoc.yaml. C'est une copie du fichier de yamldoc/pub.
+  index.php permet de visualiser le contenu de cette structure avec, notamment, un affichage assez rapide, en une page Html,
+  de tous les labels, notamment pour en rechercher un. Il définit aussi une structuration Php.
+  Si je décide d'investir sur cette structure, il faut que je capitalise la création et donc la mise à jour de ce fichier.
+  Dans les différents fichiers téléchargeables sur la page EuroVoc, eurovoc_in_skos_core_concepts.zip semble le plus
+  utilisable. Il correspond à du RDF/XML donc pas très lisible.
+  Il est cependant suffisament petit (53 Mo) pour pouvoir être importé dans EasyRdf pour
+    1) générer du Turtle pour visualiser son contenu,
+    2) générer du JSON-LD assez exploitable en Php,
+    3) supprimer les langues autres que 'fr'' et 'en' pour l'alléger
+  Je peux développer un convertisseur en YamlSkos à partir de ce format afin de capitaliser la création du fichier
+  en YamlSkos.
+journal: |
+  22/7/2021:
+    création
+phpScripts:
+  - /georef/eurovoc/index.php
