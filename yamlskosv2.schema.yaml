@@ -1,0 +1,149 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Schema d'un YamlSkos multi-lingue (V2) définissant un thésaurus multi-lingue organisé en domaines et micro-thésaurus
+modified: '2021-07-24'
+description: |
+  un document YamlSkos V2 contient un thésaurus organisé en micro-thésaurus (Scheme), chacun contenant des concepts.
+  Les micro-thésaurus sont eux-mêmes organisés en domaines.
+  Un YamlSkos permet notamment de stocker EuroVoc.
+  Simplification de format par rapport à la V1 définie dans YamlDoc.
+  Evolutions principales:
+    - suppression du domainScheme
+    - utilisation pour les domaines du nombre en début de libellé comme identifiant
+    - un scheme appartient à un seul domaine
+definitions:
+  mulString:
+    description: texte libre multi-lingue codé comme un dictionnaire de string indexé par le code ISO 639-1 de la langue
+    type: object
+    additionalProperties: false
+    patternProperties:
+      '^[a-z][a-z]$':
+        type: string
+    examples:
+      - {fr: Union européenne, en: European Union}
+  mulStrings:
+    description: liste de chaines organisée par langue, une ou plusieurs par langue
+    type: object
+    patternProperties:
+      ^[a-z][a-z]$:
+        type: [array, string]
+        items:
+          type: string
+type: object
+required: [title, language, $schema, domains, schemes, concepts]
+additionalProperties: false
+properties:
+  title:
+    description: Titre principal du document multi-lingue
+    $ref: '#/definitions/mulString'
+  language:
+    description: les langues de la ressource ISO 639-1 (alpha 2)
+    type: array
+    items:
+      type: string
+      pattern: ^[a-z][a-z]$
+  description:
+    description: Une explication multi-lingue de la ressource.
+    $ref: '#/definitions/mulString'
+  $schema:
+    const: yamlskosv2
+  domains:
+    description: dictionnaire des domaines
+    type: object
+    additionalProperties: false
+    patternProperties:
+      '^[0-9]+$':
+        type: object
+        additionalProperties: false
+        properties:
+          prefLabel:
+            description: forme lexicale préférentielle, multi-lingue, une seule par langue
+            $ref: '#/definitions/mulString'
+          notation:
+            description: utilisé dans EuroVoc
+            type: array
+            items:
+              type: [string, number]
+  schemes:
+    description: dictionnaire des schemes
+    type: object
+    additionalProperties:
+      description: scheme
+      type: object
+      additionalProperties: false
+      properties:
+        domain:
+          description: id du domaine dans lequel le scheme apparait, optionnel
+          type: number
+        hasTopConcept:
+          description: liste des id des topConcepts du scheme
+          type: array
+          items:
+            type: [string, number]
+        prefLabel:
+          description: forme lexicale préférentielle, multi-lingue, une seule par langue
+          $ref: '#/definitions/mulString'
+        notation:
+          description: utilisé dans EuroVoc
+          type: array
+          items:
+            type: [string, number]
+  concepts:
+    description: dictionnaire des concepts
+    type: object
+    additionalProperties:
+      description: concept
+      type: object
+      required: [inScheme, prefLabel]
+      additionalProperties: false
+      properties:
+        inScheme:
+          description: liste des scheme contenant le concept
+          type: array
+          items:
+            type: [string, number]
+        topConceptOf:
+          description: liste des schemes dont le concept est topConcept
+          type: array
+          items:
+            type: [string, number]
+        prefLabel:
+          description: forme lexicale préférentielle, multi-lingue, une seule par langue
+          $ref: '#/definitions/mulString'
+        altLabel:
+          description: synonymes organisés par langue, un ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        definition:
+          description: définition du concept par langue, un ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        scopeNote:
+          description: notes d'application organisées par langue, une ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        editorialNote:
+          description: note éditoriale par langue, une ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        changeNote:
+          description: note de modification par langue, une ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        historyNote:
+          description: note historique par langue, une ou plusieurs par langue
+          $ref: '#/definitions/mulStrings'
+        broader:
+          description: liste des concepts génériques 
+          type: array
+          items:
+            type: [string, number]
+        narrower:
+          description: liste des concepts spécifiques, déduit de broader 
+          type: array
+          items:
+            type: [string, number]
+        related:
+          description: liste des concepts avec lesquels existe une relation d'association sémantique
+          type: array
+          items:
+            type: [string, number]
+        notation:
+          description: utilisé dans EuroVoc
+          type: array
+          items:
+            type: [string, number]

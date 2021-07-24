@@ -8,6 +8,8 @@ doc: |
   Il est cependant suffisament petit (53 Mo) pour pouvoir être importé dans EasyRdf.
   Dans cette version je gère en pser la sérialisation Php de ce fichier avec suppression des langues autres que fr et en.
   Cette structure Php assez simple peut être ré-injectée dans EasyRdf par exemple pour obtenir une sérialisation Turtle.
+
+  Les domaines ne sont pas définis.
 journal: |
   24/7/2021:
     première version
@@ -154,67 +156,51 @@ if ($option == 'yamlskos') {
   foreach ($graph as $uri => $resource) {
     $id = substr($uri, strlen('http://eurovoc.europa.eu/'));
     if ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]ConceptScheme") { // construction des ConceptScheme
-      unset($resource["$prf[rdf]type"]);
       echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
-      YamlSkos::$schemes[$id]['domain'] = [];
+      unset($resource["$prf[rdf]type"]);
+      $scheme = ['domain'=> []];
       foreach ($resource["$prf[skos]prefLabel"] as $v)
-        YamlSkos::$schemes[$id]['prefLabel'][$v['lang']] = $v['value'];
+        $scheme['prefLabel'][$v['lang']] = $v['value'];
       unset($resource["$prf[skos]prefLabel"]);
       YamlSkos::$schemes[$id]['hasTopConcept'] = [];
       if (isset($resource["$prf[skos]notation"])) {
         foreach ($resource["$prf[skos]notation"] as $v)
-          YamlSkos::$schemes[$id]['notation'][] = $v['value'];
+          $scheme['notation'][] = $v['value'];
         unset($resource["$prf[skos]notation"]);
       }
       if ($resource) {
         //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
         echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
       }
-      echo Yaml::dump(['schemes'=> [$id => YamlSkos::$schemes[$id]]], 4, 2);
-
-      /*
-        100166:
-          domain:
-            - 100142
-          prefLabel:
-            fr: 0421 Parlement
-            en: 0421 parliament
-          hasTopConcept:
-            - 2246
-            - 41
-            - 2242
-            - 3232
-            - 53
-          notation:
-            - 0421
-      */
+      echo Yaml::dump(['schemes'=> [$id => $scheme]], 4, 2);
+      YamlSkos::$schemes[$id] = $scheme;
       //die();
     }
     elseif ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]Concept") { // construction des concepts
       //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
       unset($resource["$prf[rdf]type"]);
-      YamlSkos::$concepts[$id] = [];
+      $concept = [];
       if (isset($resource["$prf[skos]inScheme"])) {
         foreach ($resource["$prf[skos]inScheme"] as $v)
-          YamlSkos::$concepts[$id]['inScheme'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+          $concept['inScheme'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
         unset($resource["$prf[skos]inScheme"]);
       }
       if (isset($resource["$prf[skos]topConceptOf"])) {
         foreach ($resource["$prf[skos]topConceptOf"] as $v)
-          YamlSkos::$concepts[$id]['topConceptOf'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+          $concept['topConceptOf'][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
         unset($resource["$prf[skos]topConceptOf"]);
       }
       // Le champ pour lequel il ne peut y avoir qu'un littéral par langue
       if (isset($resource["$prf[skos]prefLabel"])) {
         foreach ($resource["$prf[skos]prefLabel"] as $v)
-          YamlSkos::$concepts[$id]['prefLabel'][$v['lang']] = $v['value'];
+          $concept['prefLabel'][$v['lang']] = $v['value'];
         unset($resource["$prf[skos]prefLabel"]);
       }
       // Les champs pour lesquels il peut y avoir plusieurs littéraux par langue
       foreach (['altLabel','definition','scopeNote','editorialNote','changeNote','historyNote'] as $labelNote) {
         if (isset($resource["$prf[skos]$labelNote"])) {
           foreach ($resource["$prf[skos]$labelNote"] as $v)
-            YamlSkos::$concepts[$id][$labelNote][$v['lang']][] = $v['value'];
+            $concept[$labelNote][$v['lang']][] = $v['value'];
           unset($resource["$prf[skos]$labelNote"]);
         }
       }
@@ -222,23 +208,24 @@ if ($option == 'yamlskos') {
       foreach (['broader','narrower','related'] as $labelLink) {
         if (isset($resource["$prf[skos]$labelLink"])) {
           foreach ($resource["$prf[skos]$labelLink"] as $v)
-            YamlSkos::$concepts[$id][$labelLink][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
+            $concept[$labelLink][] = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
           unset($resource["$prf[skos]$labelLink"]);
         }
       }
       if (isset($resource["$prf[skos]notation"])) {
         foreach ($resource["$prf[skos]notation"] as $v)
-          YamlSkos::$concepts[$id]['notation'][] = $v['value'];
+          $concept['notation'][] = $v['value'];
         unset($resource["$prf[skos]notation"]);
       }
       if ($resource) {
         echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
         echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
       }
-      //echo Yaml::dump(['concepts'=> [$id => YamlSkos::$concepts[$id]]], 4, 2);
+      //echo Yaml::dump(['concepts'=> [$id => $concept]], 4, 2);
+      YamlSkos::$concepts[$id] = new Concept($id, $concept);
     }
     else {
-      echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+      //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
       die();
     }
     //echo Yaml::dump([$id => $resource], 3, 2);

@@ -40,8 +40,7 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
     self::$titles = $yaml['title'];
     //$this->hasTopConcept = $yaml['domainScheme']['hasTopConcept'];
     foreach ($yaml['domains'] as $did => $domain) {
-      //if (in_array($domain['prefLabel']['fr'], self::DOMAINS_OF_INTEREST))
-        self::$domains[$did] = new Domain($did, $domain);
+      self::$domains[$did] = new Domain($did, $domain);
     }
     foreach ($yaml['schemes'] as $sid => $scheme) {
       self::$schemes[$sid] = new Scheme($sid, $scheme);
@@ -111,7 +110,7 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
       echo "<pre>Scheme:"; print_r($yaml); echo "</pre>\n";
     }
     $this->id = $id;
-    $this->domain = $yaml['domain'][0] ?? '';
+    $this->domain = $yaml['domain'] ?? '';
     $this->prefLabels = $yaml['prefLabel'];
     $this->hasTopConcept = $yaml['hasTopConcept'] ?? [];
     if ($this->domain)
