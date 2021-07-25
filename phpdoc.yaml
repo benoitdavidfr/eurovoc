@@ -11,7 +11,8 @@ doc: |
    - suppression du domainScheme
    - utilisation pour les domaines du nombre au début de libellé comme identifiant
    - un scheme appartient au plus à un domaine, s'il n'appartient à aucun alors le champ domain vaut 0.
-  eurovoc.yaml respecte ce schéma, c'est une copie du fichier de yamldoc/pub modifiée pour respecter ce nouveau schéma.
+  eurovoc.yaml respecte ce schéma.
+  eurovoc1.yaml estune copie du fichier de yamldoc/pub modifiée pour respecter ce nouveau schéma.
   
   index.php permet de visualiser le contenu de cette structure avec, notamment, un affichage assez rapide, en une page Html,
   de tous les labels, notamment pour en rechercher un. Il utilise une structuration Php définie dans yamlskos.inc.php.

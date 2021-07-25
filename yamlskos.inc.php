@@ -31,35 +31,43 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
     '66 ÉNERGIE',
   ];
   static public array $titles; // Titre du thésaurus multi-langue [lang => title]
-  //protected array $hasTopConcept; // tableau d'id de Domain
+  static public string $issued; // date de la version d'EuroVoc ou ''
   static public array $domains; // domaines sous la forme d'un dict. [id => Domain]
   static public array $schemes; // schemes sous la forme d'un dict. [id => Scheme]
   static public array $concepts; // concepts sous la forme d'un dict. [id => Concept]
   
   static function init(array $yaml, array $options): void { // création à partir du contenu du fichier YamlSkos
     self::$titles = $yaml['title'];
+    self::$issued = $yaml['issued'] ?? '';
     //$this->hasTopConcept = $yaml['domainScheme']['hasTopConcept'];
     foreach ($yaml['domains'] as $did => $domain) {
+      if (isset(self::$domains[$did]))
+        throw new Exception("Erreur d'écrasement du domaine $did");
       self::$domains[$did] = new Domain($did, $domain);
     }
     foreach ($yaml['schemes'] as $sid => $scheme) {
+      if (isset(self::$schemes[$sid]))
+        throw new Exception("Erreur d'écrasement du schemes $sid");
       self::$schemes[$sid] = new Scheme($sid, $scheme);
     }
     foreach ($yaml['concepts'] as $cid => $concept) {
+      if (isset(self::$concepts[$cid]))
+        throw new Exception("Erreur d'écrasement du concept $cid");
       self::$concepts[$cid] = new Concept($cid, $concept);
     }
   }
   
   static function show(string $lang, array $options) { // affichage d'un menu langue et options puis de la structure
     echo "<h1>",self::$titles[$lang],"</h1>\n";
-    // affichage autre langue
+    echo "version: ",self::$issued,"</p>\n";
+    // Menu d'affichage des autres langues
     foreach (self::LANGS as $l => $label) {
       if ($l <> $lang)
         echo "<a href='?lang=$l&amp;options=",implode(',',$options),"'>Affichage en $label</a><br>\n";
     }
     $toc = in_array('toc', $options) ? 'toc' : '';
     $select = in_array('select', $options) ? 'select' : '';
-    // affichage contenu/toc
+    // Menu affichage contenu/toc
     if ($toc)
       echo "<a href='?lang=$lang&amp;options=$select'>Affichage du contenu</a><br>\n";
     else
@@ -130,6 +138,8 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
       YamlSkos::$concepts[$cId]->showLabels($lang);
     }
     echo "</ul>\n";
+    echo "<pre>\n"; print_r($this);
+    echo "</pre>\n";
   }
 };
 

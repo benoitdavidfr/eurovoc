@@ -5,9 +5,12 @@ title: index.php - affichage d'EuroVoc lu dans un YamlSkos
 doc: |
   Affichage par défaut de l'ensemble des domaines, sous-domaines (= Scheme) et concepts.
   Possibilité de cliquer sur un concept pour obtenir un affichage global.
+  Un fichier pser est créé qui correspond au fichier eurovoc.yaml sérialisé
 journal: |
+  25/7/2021:
+    - des concepts n'apparaissent pas alors qu'ils sont dans eurovoc.yaml, ex 'financement participatif'
   22/7/2021:
-    première version
+    - première version
 */
 require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__.'/yamlskos.inc.php';

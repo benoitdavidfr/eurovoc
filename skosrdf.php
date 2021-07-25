@@ -3,8 +3,14 @@
 name:  skosrdf.php
 title: skosrdf.php - utilisation d'un fichier Skos RDF/XML d'EuroVoc avec EasyRdf (v2)
 doc: |
-  Dans les différents fichiers téléchargeables sur la page EuroVoc, eurovoc_in_skos_core_concepts.zip semble le plus
-  utilisable. Il est formaté en RDF/XML donc pas très lisible.
+  Ce script a pour objectifs de :
+   1) consulter le fichier Skos RDF/XML d'EuroVoc en Turtle ou YamlLd
+   2) générer le fichier eurovoc.yam structuré selon le schéma YamlSkosV2
+
+  Le fichier RDF/XML utilisé provient de la page ci-dessous de distribution d'EuroVoc:
+  https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc
+  C'est celui nommé eurovoc_in_skos_core_concepts.zip
+  Dézipper il est formaté en RDF/XML donc pas très lisible.
   Il est cependant suffisament petit (53 Mo) pour être importé dans EasyRdf.
   Ce script exploite ce fichier Skos en utilisant EasyRdf pour le lire.
   Un fichier pser est constitué pour accélérer les traitements, il correspond à la sérialisation Php du fichier RDF/XML
@@ -14,8 +20,8 @@ doc: |
   La sérialisation Php d'EasyRdf génère un graphe Php sous la forme [{subject} => [{predicate} => [{valeur}]]]
   où:
     - {subject} et {predicate} sont chacun un URI
-    - {valeur} correspond à un des objets associé à {subject} et {predicate},
-      c'est soit un URI soit un litéral éventuellement associé à une lange
+    - {valeur} correspond à une des ressources associée à {subject} et {predicate},
+      c'est soit un URI, soit un litéral, éventuellement associé à une lange
       structuré comme un dict. ['type'=> ('uri'|'literal'), 'value'=>{value}, ('lang'=>{lang})?]
 
   Ce fichier Skos a les particularités suivantes :
@@ -31,26 +37,28 @@ doc: |
       <http://eurovoc.europa.eu/domains>
         a skos:ConceptScheme ;
         skos:prefLabel "Eurovoc domains"@en .
-    - Il existe un scheme ayant pour prefLabel "EuroVoc" qui comprend tous les topConcepts
+    - Il existe un scheme particulier ayant pour prefLabel "EuroVoc" qui comprend tous les topConcepts
       <http://eurovoc.europa.eu/100141>
         a skos:ConceptScheme ;
         skos:prefLabel "EuroVoc"@en, "EuroVoc"@fr .
+      Je le conserve comme Scheme hors domaine (domaine 0)
 
-  Le fichier ne contient pas la relation entre un ConceptScheme et son domaine.
+  Le fichier ne contient pas le lien d'appartenance d'un ConceptScheme à son domaine.
+  Ce lien peut être construit en utilisant les chiffres initiaux du prefLabel.
 
-  Ce script a pour objectifs de :
-   1) consulter le fichier Skos RDF/XML d'EuroVoc en Turtle ou YamlLd
-   2) générer le fichier eurovoc.yam structuré selon le schéma yamlskosv2
-
-  Dans la génération du fichier eurovoc.yaml
+  Dans la génération du fichier eurovoc.yaml conforme au schéma YamlSkosV2 :
+    - les concepts appartenant au scheme <http://eurovoc.europa.eu/domains> sont définis comme des domaines ;
+      leur id est défini par l'entier constitué des 2 premiers chiffres du prefLabel.
+    - le scheme <http://eurovoc.europa.eu/domains> est éliminé
+    - le scheme EuroVoc est conservé comme Scheme hors domaine (domaine=0)
 
 journal: |
-  24/7/2021:
+  24-25/7/2021:
     première version
 */
 require_once __DIR__.'/vendor/autoload.php';
 
-define ('LANGS', ['en','fr']);
+define ('PRESERVED_LANGS', ['en','fr']); // langues conservées, les autres sont supprimées, si faux alors pas de suppression
 
 ini_set('memory_limit','2G');
 //set_time_limit(5*60);
@@ -76,33 +84,36 @@ if ($option == 'easyRdf') { // affichage de caractéristique d'EasyRdf
   die();
 }
 
-if (is_file(__DIR__.'/eurovoc_in_skos_core_concepts.pser')) {
+if (is_file(__DIR__.'/eurovoc_in_skos_core_concepts.pser')) { // si pser existe alors il contient le graphe sérialisé Php
   $graph = unserialize(file_get_contents(__DIR__.'/eurovoc_in_skos_core_concepts.pser'));
 }
-else {
+else { // Sinon je le construit à partir du RDF/XML en utilisant EasyRdf puis en supprimant les langues hors PRESERVED_LANGS
   $graph = file_get_contents(__DIR__.'/eurovoc_in_skos_core_concepts.rdf');
   $graph = new \EasyRdf\Graph('http://eurovoc.europa.eu/', $graph, 'rdfxml');
   $graph = $graph->serialise('php');
-  foreach ($graph as $s => $po) {
-    //echo Yaml::dump(['source'=> [$s => $po]], 4, 2);
-    $r = [];
-    foreach ($po as $p => $o) {
-      foreach ($o as $i => $v) {
-        if (($v['type']<>'literal') || !isset($v['lang']) || in_array($v['lang'], LANGS)) {
-          $r[$p][] = $v;
+  if (PRESERVED_LANGS) { // suppression des langues autres que celles dans LANGS
+    foreach ($graph as $s => $po) {
+      //echo Yaml::dump(['source'=> [$s => $po]], 4, 2);
+      $r = [];
+      foreach ($po as $p => $o) {
+        foreach ($o as $i => $v) {
+          if (($v['type']<>'literal') || !isset($v['lang']) || in_array($v['lang'], PRESERVED_LANGS)) {
+            $r[$p][] = $v;
+          }
         }
       }
+      //echo Yaml::dump(['dest'=> [$s => $r]], 4, 2);
+      $graph[$s] = $r;
     }
-    //echo Yaml::dump(['dest'=> [$s => $r]], 4, 2);
-    $graph[$s] = $r;
   }
   file_put_contents(__DIR__.'/eurovoc_in_skos_core_concepts.pser', serialize($graph));
 }
 
-if ($id)
+if ($id) { // si le paramètre id est présent alors je restreint le graphe à la ressource identifiée par cet id
   $graph = ["http://eurovoc.europa.eu/$id" => $graph["http://eurovoc.europa.eu/$id"]];
+}
 
-if ($option == 'ttl') {
+if ($option == 'ttl') { // génération du graphe en Turtle 
   $graph = new \EasyRdf\Graph('http://eurovoc.europa.eu/', $graph, 'php');
   echo $graph->serialise('turtle');
   die();
@@ -170,7 +181,7 @@ if ($option == 'yamlld') { // Affichage Yaml à la JSON-LD en mettant les URI en
 }
 
 if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
-  //require_once __DIR__.'/yamlskos.inc.php';
+  // les préfixes
   $prf = [
     'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
     'skos' => 'http://www.w3.org/2004/02/skos/core#',
@@ -180,145 +191,17 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
       'fr'=> "EuroVoc, thésaurus multilingue de l'Union européenne",
       'en'=> "EuroVoc, the EU's multilingual thesaurus",
     ],
-    'language'=> ['fr','en'],
-    'issued'=> '2021-06-04', // la dernière version le jour du téléchargement du RDF
-    '$schema'=> 'yamlskosv2',
-    'domains'=> [
-      /*4 => [
-        "prefLabel" => [
-          "en" => "04 POLITICS",
-          "fr" => "04 VIE POLITIQUE",
-        ],
-      ],
-      8 => [
-        "prefLabel" => [
-          "en" => "08 INTERNATIONAL RELATIONS",
-          "fr" => "08 RELATIONS INTERNATIONALES",
-        ],
-      ],
-      10 => [
-        "prefLabel" => [
-          "en" => "10 EUROPEAN UNION",
-          "fr" => "10 UNION EUROPÉENNE",
-        ],
-      ],
-      12 => [
-        "prefLabel" => [
-          "fr" => "12 DROIT",
-          "en" => "12 LAW",
-        ],
-      ],
-      16 => [
-        "prefLabel" => [
-          "en" => "16 ECONOMICS",
-          "fr" => "16 ÉCONOMIE",
-        ],
-      ],
-      20 => [
-        "prefLabel" => [
-          "en" => "20 TRADE",
-          "fr" => "20 ÉCHANGES ÉCONOMIQUES ET COMMERCIAUX",
-        ],
-      ],
-      24 => [
-        "prefLabel" => [
-          "en" => "24 FINANCE",
-          "fr" => "24 FINANCES",
-        ],
-      ],
-      28 => [
-        "prefLabel" => [
-          "fr" => "28 QUESTIONS SOCIALES",
-          "en" => "28 SOCIAL QUESTIONS",
-        ],
-      ],
-      32 => [
-        "prefLabel" => [
-          "en" => "32 EDUCATION AND COMMUNICATIONS",
-          "fr" => "32 ÉDUCATION ET COMMUNICATION",
-        ],
-      ],
-      36 => [
-        "prefLabel" => [
-          "en" => "36 SCIENCE",
-          "fr" => "36 SCIENCES",
-        ],
-      ],
-      40 => [
-        "prefLabel" => [
-          "en" => "40 BUSINESS AND COMPETITION",
-          "fr" => "40 ENTREPRISE ET CONCURRENCE",
-        ],
-      ],
-      44 => [
-        "prefLabel" => [
-          "fr" => "44 EMPLOI ET TRAVAIL",
-          "en" => "44 EMPLOYMENT AND WORKING CONDITIONS",
-        ],
-      ],
-      48 => [
-        "prefLabel" => [
-          "en" => "48 TRANSPORT",
-          "fr" => "48 TRANSPORTS",
-        ],
-      ],
-      52 => [
-        "prefLabel" => [
-          "en" => "52 ENVIRONMENT",
-          "fr" => "52 ENVIRONNEMENT",
-        ],
-      ],
-      56 => [
-        "prefLabel" => [
-          "en" => "56 AGRICULTURE, FORESTRY AND FISHERIES",
-          "fr" => "56 AGRICULTURE, SYLVICULTURE ET PÊCHE",
-        ],
-      ],
-      60 => [
-        "prefLabel" => [
-          "en" => "60 AGRI-FOODSTUFFS",
-          "fr" => "60 AGRO-ALIMENTAIRE",
-        ],
-      ],
-      64 => [
-        "prefLabel" => [
-          "fr" => "64 PRODUCTION, TECHNOLOGIE ET RECHERCHE",
-          "en" => "64 PRODUCTION, TECHNOLOGY AND RESEARCH",
-        ],
-      ],
-      66 => [
-        "prefLabel" => [
-          "en" => "66 ENERGY",
-          "fr" => "66 ÉNERGIE",
-        ],
-      ],
-      68 => [
-        "prefLabel" => [
-          "fr" => "68 INDUSTRIE",
-          "en" => "68 INDUSTRY",
-        ],
-      ],
-      72 => [
-        "prefLabel" => [
-          "en" => "72 GEOGRAPHY",
-          "fr" => "72 GÉOGRAPHIE",
-        ],
-        "notation" => [
-          72,
-        ],
-      ],
-      76 => [
-        "prefLabel" => [
-          "en" => "76 INTERNATIONAL ORGANISATIONS",
-          "fr" => "76 ORGANISATIONS INTERNATIONALES",
-        ],
-      ],*/
-    ],
+    'language'=> PRESERVED_LANGS,
+    'issued'=> '2021-06-04', // identification de la version téléchargée
+    '$schema'=> 'yamlskosv2', // le nom du fichier contenant le schéma, sans .schema.yaml
+    'domains'=> [],
     'schemes'=> [],
     'concepts'=> [],
   ];
   foreach ($graph as $uri => $resource) {
     $id = substr($uri, strlen('http://eurovoc.europa.eu/'));
+    if ($id == 'domains') // le scheme <http://eurovoc.europa.eu/domains> des domaines n'est pas considéré comme un scheme
+      continue;
     if (is_numeric($id))
       $id = (int)$id;
     if ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]ConceptScheme") { // construction des ConceptScheme
@@ -329,8 +212,10 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
         $scheme['prefLabel'][$v['lang']] = $v['value'];
       unset($resource["$prf[skos]prefLabel"]);
       if (isset($scheme['prefLabel']['fr'])) {
-        $domain = substr($scheme['prefLabel']['fr'], 0, 2);
-        $scheme['domain'] = is_numeric($domain)  ? (int)$domain : $domain;
+        if ($scheme['prefLabel']['fr'] <> 'EuroVoc') {
+          $domain = substr($scheme['prefLabel']['fr'], 0, 2);
+          $scheme['domain'] = is_numeric($domain)  ? (int)$domain : $domain;
+        }
       }
       $scheme['hasTopConcept'] = []; // ce champ est renseigné à partir des de la lecture des concepts
       if (isset($resource["$prf[skos]notation"])) {
@@ -343,13 +228,12 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
         echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
       }
       //echo Yaml::dump(['schemes'=> [$id => $scheme]], 4, 2);
-      if ($id <> 'domains') // le scheme <http://eurovoc.europa.eu/domains> des domaines n'est pas considéré comme un scheme
-        $yamlSkos['schemes'][$id] = $scheme;
+      $yamlSkos['schemes'][$id] = $scheme;
     }
     elseif ($resource["$prf[rdf]type"][0]['value'] == "$prf[skos]Concept") { // construction des concepts
       //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
       unset($resource["$prf[rdf]type"]);
-      $concept = [];
+      $concept = []; // structuration à la YamlSkosV2
       if (isset($resource["$prf[skos]inScheme"])) {
         foreach ($resource["$prf[skos]inScheme"] as $v) {
           $inScheme = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
@@ -398,23 +282,25 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
           $concept['notation'][] = is_numeric($v['value']) ? (int)$v['value'] : $v['value'];
         unset($resource["$prf[skos]notation"]);
       }
-      if ($resource) {
-        //echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+      if ($resource) { // des champs de la ressource n'ont pas été transférés
+        echo "Erreur: des champs de la ressource Concept n'ont pas été pris en compte\n";
         echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
         die();
       }
-      if ($concept['inScheme'][0] == 'domains') { // Les concepts dans le scheme domains sont des domaines et pas des concepts
+      if ($concept['inScheme'][0] == 'domains') { // Les concepts du scheme domains sont des domaines et pas des concepts
         //echo Yaml::dump(['concepts'=> [$id => $concept]], 4, 2);
+        $id = (int)substr($concept['prefLabel']['fr'], 0, 2); // les 2 premiers caractères forment le numéro et id du doamine
         $yamlSkos['domains'][$id] = [
           'prefLabel'=> $concept['prefLabel'],
           'notation'=> $concept['notation'],
         ];
       }
-      else
+      else // autre concept
         $yamlSkos['concepts'][$id] = $concept;
     }
-    else {
-      echo Yaml::dump(['source'=> [$id => $resource]], 4, 2);
+    else { // cas d'erreur où la ressource n'est ni un concept ni un conceptScheme
+      echo "Erreur: la ressource suivante n'est ni un concept ni un scheme\n";
+      echo Yaml::dump(['error'=> [$id => $resource]], 4, 2);
       die();
     }
   }
