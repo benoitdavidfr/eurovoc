@@ -658,7 +658,6 @@ schemes:
       - 4483
       - 4539
       - 6011
-      - 4826
       - 490
       - 5051
       - 8301
@@ -2204,7 +2203,6 @@ schemes:
       - 1455
       - 2179
       - 8380
-      - 4826
     notation:
       - 7606
   100286:
@@ -2245,7 +2243,6 @@ schemes:
       fr: '7626 organisations non gouvernementales'
     hasTopConcept:
       - 2191
-      - 4826
     notation:
       - 7626
 concepts:
@@ -138780,20 +138777,6 @@ concepts:
       - c_8331ae25
     notation:
       - 4824
-  4826:
-    inScheme:
-      - 100141
-      - 100285
-      - 100289
-    topConceptOf:
-      - 100141
-      - 100285
-      - 100289
-    prefLabel:
-      en: TAB
-      fr: BAT
-    notation:
-      - 4826
   7945:
     inScheme:
       - 100141

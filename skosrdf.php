@@ -52,6 +52,8 @@ doc: |
     - le scheme <http://eurovoc.europa.eu/domains> est éliminé
     - le scheme EuroVoc est conservé comme Scheme hors domaine (domaine=0)
 
+  Suppression:
+    - du concept BAT qui n'existe pas dans la version interactive
 journal: |
   24-25/7/2021:
     première version
@@ -250,7 +252,6 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
             if (is_numeric($topConceptOf))
               $topConceptOf = (int)$topConceptOf;
             $concept['topConceptOf'][] = $topConceptOf;
-            $yamlSkos['schemes'][$topConceptOf]['hasTopConcept'][] = $id;
           }
         }
         unset($resource["$prf[skos]topConceptOf"]);
@@ -260,6 +261,14 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
         foreach ($resource["$prf[skos]prefLabel"] as $v)
           $concept['prefLabel'][$v['lang']] = $v['value'];
         unset($resource["$prf[skos]prefLabel"]);
+      }
+      // Suppression de certains artéfacts
+      if ($concept['prefLabel']['fr'] == "BAT") {
+        continue;
+      }
+      // report des topConceptOf, après la suppression des artéfacts
+      foreach ($concept['topConceptOf'] ?? [] as $topConceptOf) {
+        $yamlSkos['schemes'][$topConceptOf]['hasTopConcept'][] = $id;
       }
       // Les champs pour lesquels il peut y avoir plusieurs littéraux par langue
       foreach (['altLabel','definition','scopeNote','editorialNote','changeNote','historyNote'] as $labelNote) {
