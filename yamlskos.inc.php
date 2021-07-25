@@ -8,8 +8,11 @@ doc: |
   2 options sont définies et sont passées dans le paramètre GET options comme liste de chaines:
     - 'toc' permet de n'afficher que la table des matières, cad les labels des domaines et des schemes
     - 'select' permet de restreindre l'affichage àa la liste des domaines d'intérêt définie en constante
+
+  A FAIRE:
+    - Affichage des étiquettes préférentielles et synonymes par ordre alphabétique
 journal: |
-  24/7/2021:
+  24-25/7/2021:
     première version
 */
 use Symfony\Component\Yaml\Yaml;
@@ -76,6 +79,7 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
       echo "<a href='?lang=$lang&amp;options=$toc'>Affichage de tous les domaines</a><br>\n";
     else
       echo "<a href='?lang=$lang&amp;options=select",($toc ? ",$toc" : ''),"'>Affichage uniquement des domaines d'intérêt</a><br>\n";
+    echo "<a href='?lang=$lang&amp;options=terms'>Affichage des étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
     foreach (self::$domains as $did => $domain) {
       $domain->show($lang, $options);
     }
@@ -147,7 +151,10 @@ class Concept {
   protected array $inSchemes; // liste d'identifiant de schemes
   protected array $prefLabels; // dict. de prefLabel indexé par la langue
   protected array $altLabels; // dict. de listes de altLabels indexé par la langue
+  protected array $definitions; // dict. de listes de definitions indexé par la langue
   protected array $scopeNotes; // dict. de listes de scopeNotes indexé par la langue
+  protected array $editorialNotes; // dict. de listes de editorialNotes indexé par la langue
+  protected array $changeNotes; // dict. de listes de changeNote indexé par la langue
   protected array $historyNotes; // dict. de listes de historyNotes indexé par la langue
   protected array $broaders; // liste des id des concepts plus généraux
   protected array $narrowers; // liste des id des concepts plus étroits
@@ -155,17 +162,17 @@ class Concept {
   protected array $yaml; // structure SkosYaml initiale pour mise au point
   
   function __construct(string $id, array $yaml) {
-    if ($id == 0) {
-      echo "<pre>Concept $id:"; print_r($yaml);
-    }
     $this->id = $id;
     $this->inSchemes = $yaml['inScheme'];
     $this->prefLabels = $yaml['prefLabel'];
     $this->altLabels = $yaml['altLabel'] ?? [];
+    $this->definitions = $yaml['definition'] ?? [];
     $this->scopeNotes = $yaml['scopeNote'] ?? [];
+    $this->editorialNotes = $yaml['editorialNote'] ?? [];
+    $this->changeNotes = $yaml['changeNote'] ?? [];
     $this->historyNotes = $yaml['historyNote'] ?? [];
-    $this->narrowers = $yaml['narrower'] ?? [];
     $this->broaders = $yaml['broader'] ?? [];
+    $this->narrowers = $yaml['narrower'] ?? [];
     $this->related = $yaml['related'] ?? [];
     $this->yaml = $yaml;
   }
@@ -200,8 +207,14 @@ class Concept {
     echo Yaml::dump(['prefLabel'=> $this->prefLabels], 3, 2);
     if ($this->altLabels)
       echo Yaml::dump(['altLabel'=> $this->altLabels], 3, 2);
+    if ($this->definitions)
+      echo Yaml::dump(['definition'=> $this->definitions], 3, 2);
     if ($this->scopeNotes)
       echo Yaml::dump(['scopeNote'=> $this->scopeNotes], 3, 2);
+    if ($this->editorialNotes)
+      echo Yaml::dump(['editorialNote'=> $this->editorialNotes], 3, 2);
+    if ($this->changeNotes)
+      echo Yaml::dump(['changeNote'=> $this->changeNotes], 3, 2);
     if ($this->historyNotes)
       echo Yaml::dump(['historyNote'=> $this->historyNotes], 3, 2);
     if ($this->broaders) {
@@ -219,7 +232,6 @@ class Concept {
       foreach ($this->related as $related)
         echo '  - ',YamlSkos::$concepts[$related]->prefLabel($lang),"\n";
     }
-    echo "\n"; print_r($this);
-    echo "</pre>\n";
+    //echo "\n"; print_r($this); echo "</pre>\n";
   }
 };
