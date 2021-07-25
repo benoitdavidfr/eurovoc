@@ -25,6 +25,7 @@ skosrdf.php permet de consulter ce fichier RDF et de le convertir en un fichier 
 
 Le module utilise:
 
-  - EasyRdf pour exploiter le format RDF/XML et
-  - symfony/yaml pour lire et écrire les fichiers Yaml.
+  - [EasyRdf](https://www.easyrdf.org/) pour exploiter le format RDF/XML et
+  - [le composant Yaml de Symfony](https://symfony.com/doc/current/components/yaml.html) 
+    pour lire et écrire les fichiers Yaml.
 
