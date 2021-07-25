@@ -21,13 +21,14 @@ echo "<html><head><meta charset='UTF-8'><title>eurovoc</title></head><body>\n";
 $lang = $_GET['lang'] ?? 'fr';
 $options = isset($_GET['options']) ? explode(',', $_GET['options']) : [];
 
-if (is_file(__DIR__.'/eurovoc.pser')) {
-  YamlSkos::init(unserialize(file_get_contents(__DIR__.'/eurovoc.pser')), $options);
+$fileName = $_GET['yaml'] ?? 'eurovoc';
+if (is_file(__DIR__."/$fileName.pser")) {
+  YamlSkos::init(unserialize(file_get_contents(__DIR__."/$fileName.pser")), $options);
 }
 else {
-  $yaml = Yaml::parseFile(__DIR__.'/eurovoc.yaml');
+  $yaml = Yaml::parseFile(__DIR__."/$fileName.yaml");
   YamlSkos::init($yaml, $options);
-  file_put_contents(__DIR__.'/eurovoc.pser', serialize($yaml));
+  file_put_contents(__DIR__."/$fileName.pser", serialize($yaml));
 }
 
 if (isset($_GET['scheme'])) {

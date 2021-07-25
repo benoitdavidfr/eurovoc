@@ -41,6 +41,10 @@ properties:
     items:
       type: string
       pattern: ^[a-z][a-z]$
+  issued:
+    description: Date de publication de cette version d'EuroVoc
+    type: string
+    format: date
   description:
     description: Une explication multi-lingue de la ressource.
     $ref: '#/definitions/mulString'

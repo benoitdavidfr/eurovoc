@@ -102,7 +102,7 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
   protected array $hasTopConcept; // tableau d'id des TopConcepts
   
   function __construct(string $id, array $yaml) {
-    //echo "Scheme:"; print_r($yaml);
+    //echo "<pre>Scheme:"; print_r($yaml); echo "</pre>\n";
     if (0 && isset($yaml['domain']) && (count($yaml['domain']) > 1)) {
       echo "<pre>Scheme:"; print_r($yaml); echo "</pre>\n";
     }
@@ -111,7 +111,7 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
     }
     $this->id = $id;
     $this->domain = $yaml['domain'] ?? '';
-    $this->prefLabels = $yaml['prefLabel'];
+    $this->prefLabels = $yaml['prefLabel'] ?? ['fr'=> "AUCUN PREFLABEL", 'en'=> "NO PREFLABEL"];
     $this->hasTopConcept = $yaml['hasTopConcept'] ?? [];
     if ($this->domain)
       YamlSkos::$domains[$this->domain]->schemes[] = $this;
@@ -172,8 +172,12 @@ class Concept {
     //print_r($this);
     if ($this->narrowers) {
       echo "<ul>\n";
-      foreach ($this->narrowers as $narrower)
-        YamlSkos::$concepts[$narrower]->showLabels($lang);
+      foreach ($this->narrowers as $narrower) {
+        if (!isset(YamlSkos::$concepts[$narrower]))
+          echo "<li>NARROWER $narrower incorrect</li>\n";
+        else
+          YamlSkos::$concepts[$narrower]->showLabels($lang);
+      }
       echo "</ul>\n";
     }
   }
