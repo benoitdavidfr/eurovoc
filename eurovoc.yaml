@@ -140,6 +140,7 @@ schemes:
       en: EuroVoc
       fr: EuroVoc
     hasTopConcept:
+      - 337
       - 2449
       - 1000
       - 1004
@@ -690,6 +691,7 @@ schemes:
       en: '7211 regions of EU Member States'
       fr: '7211 régions des États membres de l''Union européenne'
     hasTopConcept:
+      - 337
       - 6135
       - 1088
       - 1520
@@ -721,6 +723,7 @@ schemes:
       en: '2006 trade policy'
       fr: '2006 politique commerciale'
     hasTopConcept:
+      - 2449
       - 2487
       - 1810
       - 524
@@ -751,32 +754,10 @@ schemes:
       en: '2426 financing and investment'
       fr: '2426 investissement et financement'
     hasTopConcept:
+      - 1000
       - 1488
     notation:
       - 2426
-  domains:
-    hasTopConcept:
-      - 100142
-      - 100143
-      - 100144
-      - 100145
-      - 100146
-      - 100147
-      - 100148
-      - 100149
-      - 100150
-      - 100151
-      - 100152
-      - 100153
-      - 100154
-      - 100155
-      - 100156
-      - 100157
-      - 100158
-      - 100159
-      - 100160
-      - 100161
-      - 100162
   100163:
     domain: 4
     prefLabel:

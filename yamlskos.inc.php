@@ -138,8 +138,7 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
       YamlSkos::$concepts[$cId]->showLabels($lang);
     }
     echo "</ul>\n";
-    echo "<pre>\n"; print_r($this);
-    echo "</pre>\n";
+    //echo "<pre>\n"; print_r($this);echo "</pre>\n";
   }
 };
 

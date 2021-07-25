@@ -217,7 +217,9 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
           $scheme['domain'] = is_numeric($domain)  ? (int)$domain : $domain;
         }
       }
-      $scheme['hasTopConcept'] = []; // ce champ est renseigné à partir des de la lecture des concepts
+      // le champ hasTopConcept est renseigné à partir des de la lecture des concepts
+      // Certains topConcepts ont pu être lus avant le scheme, il faut donc dans ce cas les récupérer
+      $scheme['hasTopConcept'] = $yamlSkos['schemes'][$id]['hasTopConcept'] ?? [];
       if (isset($resource["$prf[skos]notation"])) {
         foreach ($resource["$prf[skos]notation"] as $v)
           $scheme['notation'][] = is_numeric($v['value']) ? (int)$v['value'] : $v['value'];
@@ -244,10 +246,12 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
       if (isset($resource["$prf[skos]topConceptOf"])) {
         foreach ($resource["$prf[skos]topConceptOf"] as $v) {
           $topConceptOf = substr($v['value'], strlen('http://eurovoc.europa.eu/'));
-          if (is_numeric($topConceptOf))
-            $topConceptOf = (int)$topConceptOf;
-          $concept['topConceptOf'][] = $topConceptOf;
-          $yamlSkos['schemes'][$topConceptOf]['hasTopConcept'][] = $id;
+          if ($topConceptOf <> 'domains') {
+            if (is_numeric($topConceptOf))
+              $topConceptOf = (int)$topConceptOf;
+            $concept['topConceptOf'][] = $topConceptOf;
+            $yamlSkos['schemes'][$topConceptOf]['hasTopConcept'][] = $id;
+          }
         }
         unset($resource["$prf[skos]topConceptOf"]);
       }
