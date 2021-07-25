@@ -8,7 +8,7 @@ doc: |
   Un fichier pser est créé qui correspond au fichier eurovoc.yaml sérialisé
 journal: |
   25/7/2021:
-    - des concepts n'apparaissent pas alors qu'ils sont dans eurovoc.yaml, ex 'financement participatif'
+    - consultation de la dernière version d'EuroVoc
   22/7/2021:
     - première version
 */
@@ -23,6 +23,7 @@ echo "<html><head><meta charset='UTF-8'><title>eurovoc</title></head><body>\n";
 
 $lang = $_GET['lang'] ?? 'fr';
 $options = isset($_GET['options']) ? explode(',', $_GET['options']) : [];
+$action = $_GET['action'] ?? '';
 
 $fileName = $_GET['yaml'] ?? 'eurovoc';
 if (is_file(__DIR__."/$fileName.pser")) {
@@ -34,7 +35,10 @@ else {
   file_put_contents(__DIR__."/$fileName.pser", serialize($yaml));
 }
 
-if (isset($_GET['scheme'])) {
+if ($action == 'terms') {
+  YamlSkos::showTerms($lang, $options);
+}
+elseif (isset($_GET['scheme'])) {
   echo "<a href='?lang=$lang'>Revenir à l'ensemble du thésaurus</a><br>\n";
   YamlSkos::$schemes[$_GET['scheme']]->show($lang, $options);
 }

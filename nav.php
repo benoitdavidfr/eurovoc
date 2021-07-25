@@ -4,6 +4,7 @@ name:  nav.php
 title: nav.php - navigation dans EuroVoc lu dans un YamlSkos de manière à détecter les bugs
 doc: |
   Je peux vérifier la génération du fichier eurovoc.yaml en comparant les concepts issus de index.php et de nav.php
+  Attention dans index.php, il y a des doublons.
 journal: |
   25/7/2021:
     - première version

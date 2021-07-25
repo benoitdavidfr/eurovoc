@@ -8,9 +8,6 @@ doc: |
   2 options sont définies et sont passées dans le paramètre GET options comme liste de chaines:
     - 'toc' permet de n'afficher que la table des matières, cad les labels des domaines et des schemes
     - 'select' permet de restreindre l'affichage àa la liste des domaines d'intérêt définie en constante
-
-  A FAIRE:
-    - Affichage des étiquettes préférentielles et synonymes par ordre alphabétique
 journal: |
   24-25/7/2021:
     première version
@@ -60,7 +57,7 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
     }
   }
   
-  static function show(string $lang, array $options) { // affichage d'un menu langue et options puis de la structure
+  static function show(string $lang, array $options): void { // affichage d'un menu langue et options puis de la structure
     echo "<h1>",self::$titles[$lang],"</h1>\n";
     echo "version: ",self::$issued,"</p>\n";
     // Menu d'affichage des autres langues
@@ -79,9 +76,56 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
       echo "<a href='?lang=$lang&amp;options=$toc'>Affichage de tous les domaines</a><br>\n";
     else
       echo "<a href='?lang=$lang&amp;options=select",($toc ? ",$toc" : ''),"'>Affichage uniquement des domaines d'intérêt</a><br>\n";
-    echo "<a href='?lang=$lang&amp;options=terms'>Affichage des étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
+    echo "<a href='?lang=$lang&amp;action=terms'>Affichage des étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
     foreach (self::$domains as $did => $domain) {
       $domain->show($lang, $options);
+    }
+  }
+
+  // renvoie une chaine triable par sort
+  static function sorting(string $label): string {
+    $mapping = [
+      'â'=> 'a',
+      'Å'=> 'a',
+      'é'=> 'e',
+      'É'=> 'e',
+      'î'=> 'i',
+      'Î'=> 'i',
+      'œ'=> 'oe',
+      'Ö'=> 'o',
+    ];
+    $label = strtolower($label);
+    $label = str_replace(array_keys($mapping), array_values($mapping), $label);
+    return $label;
+  }
+  
+  static function showTerms(string $lang, array $options): void {
+    $terms = []; // [cle => ['label'=> label, 'concepts'=> [id => prefLabel]]]
+    foreach (self::$concepts as $id => $concept) {
+      $prefLabel = $concept->prefLabel($lang);
+      $terms[self::sorting($prefLabel)] = ['label'=> $prefLabel, 'concepts'=> [$id => $prefLabel]];
+      foreach ($concept->altLabels($lang) as $term) {
+        $key = self::sorting($term);
+        if (isset($terms[$key])) {
+          //print_r($terms[$key]);
+          $terms[$key]['concepts'][$id] = $prefLabel;
+        }
+        else
+          $terms[$key] = ['label'=> $term, 'concepts'=> [$id => $prefLabel]];
+      }
+    }
+    ksort($terms);
+    foreach ($terms as $term) {
+      if (count($term['concepts'])==1)
+        echo "<a href='?concept=",array_keys($term['concepts'])[0],"'>$term[label]</a><br>\n";
+      else {
+        //echo "<pre>"; print_r($term); echo "</pre>\n";
+        echo "$term[label] -&gt; ";
+        foreach ($term['concepts'] as $id => $prefLabel) {
+          echo "<a href='?concept=$id'>$prefLabel</a> ";
+        }
+        echo "<br>\n";
+      }
     }
   }
 };
@@ -177,14 +221,18 @@ class Concept {
     $this->yaml = $yaml;
   }
   
+  function prefLabel(string $lang): string { return $this->prefLabels[$lang]; }
+  
+  function altLabels(string $lang): array { return $this->altLabels[$lang] ?? []; }
+  
   // retourne l'étiquette dans la langue avec possibilité de naviguer sur le concept
-  function prefLabel(string $lang): string {
+  function prefLabelWithLink(string $lang): string {
     return "<a href='?lang=$lang&amp;concept=$this->id'>".$this->prefLabels[$lang]."</a>";
   }
   
   // affiche une arborescence HTML des labels dans la langue avec possibilité de naviguer sur le concept
   function showLabels(string $lang): void {
-    echo "<li>",$this->prefLabel($lang),"</li>\n";
+    echo "<li>",$this->prefLabelWithLink($lang),"</li>\n";
     //print_r($this);
     if ($this->narrowers) {
       echo "<ul>\n";
@@ -220,17 +268,17 @@ class Concept {
     if ($this->broaders) {
       echo "boader:\n";
       foreach ($this->broaders as $broader)
-        echo '  - ',YamlSkos::$concepts[$broader]->prefLabel($lang),"\n";
+        echo '  - ',YamlSkos::$concepts[$broader]->prefLabelWithLink($lang),"\n";
     }
     if ($this->narrowers) {
       echo "narrower:\n";
       foreach ($this->narrowers as $narrower)
-        echo '  - ',YamlSkos::$concepts[$narrower]->prefLabel($lang),"\n";
+        echo '  - ',YamlSkos::$concepts[$narrower]->prefLabelWithLink($lang),"\n";
     }
     if ($this->related) {
       echo "retated:\n";
       foreach ($this->related as $related)
-        echo '  - ',YamlSkos::$concepts[$related]->prefLabel($lang),"\n";
+        echo '  - ',YamlSkos::$concepts[$related]->prefLabelWithLink($lang),"\n";
     }
     //echo "\n"; print_r($this); echo "</pre>\n";
   }
