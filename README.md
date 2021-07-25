@@ -11,8 +11,11 @@ Pour stocker EuroVoc, utilisation d'une structure simplifiée en Yaml, appelée 
 par [un schéma JSON](yamlskosv2.schema.yaml).
 Le fichier [eurovoc.yaml](eurovoc.yaml) contient EuroVoc et respecte ce schéma.
 
-index.php permet de visualiser le contenu de cette structure avec, notamment, un affichage assez rapide, en une page Html,
-de tous les labels, notamment pour en rechercher un. Il utilise une structuration Php définie dans yamlskos.inc.php.
+index.php permet de visualiser le contenu de ce fichier avec, notamment, un affichage assez rapide, en une page Html,
+de tous les labels, notamment pour en rechercher un.
+Il utilise une structuration Php définie dans yamlskos.inc.php.
+
+Cette visualisation est accessible sur https://georef.eu/eurovoc/
 
 EuroVoc évolue et il faut pouvoir prendre en compte ces évolutions.  
 Dans les différents fichiers téléchargeables sur la [page EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc),

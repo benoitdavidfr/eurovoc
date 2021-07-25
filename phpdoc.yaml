@@ -29,6 +29,12 @@ doc: |
   Le module utilise:
     - EasyRdf pour exploiter le format RDF/XML et
     - symfony/yaml pour lire et écrire les fichiers Yaml.
+  
+  Copie vers http://georef.eu/eurovoc/
+  
+  synchro: http://localhost/synchro.php?remote=http://prod.geoapi.fr&dir=georef/eurovoc
+  
+  Projet Github à https://github.com/benoitdavidfr/eurovoc
 
   A FAIRE:
     - définir le site sur internet avec URI de remplacement
