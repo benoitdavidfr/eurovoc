@@ -6,7 +6,7 @@ d'[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=h
 *2ème sujet:* visualisation et recherche d'un concept.
 
 Pour stocker EuroVoc, utilisation d'une structure simplifiée en Yaml, appellée YamlSkosV2, définie
-par [un schéma JSON](blob/main/yamlskosv2.schema.yaml).
+par [un schéma JSON](yamlskosv2.schema.yaml).
 eurovoc.yaml respecte ce schéma.
 
 index.php permet de visualiser le contenu de cette structure avec, notamment, un affichage assez rapide, en une page Html,
