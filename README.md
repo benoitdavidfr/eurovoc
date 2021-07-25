@@ -1,17 +1,18 @@
 ## EuroVoc
 
 L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation d'EuroVoc.  
-1er sujet: son téléchargement et sa structuration pour différentes exploitations,  
-2ème sujet: visualisation et recherche d'un concept.
+*1er sujet:* son téléchargement et sa structuration pour différentes exploitations,  
+*2ème sujet:* visualisation et recherche d'un concept.
 
-Pour stocker EuroVoc, j'utilise une structure simplifiée en Yaml, que j'appelle YamlSkosV2, définie par un schéma JSON.  
+Pour stocker EuroVoc, j'utilise une structure simplifiée en Yaml, que j'appelle YamlSkosV2, définie par un schéma JSON.
 eurovoc.yaml respecte ce schéma.
 
 index.php permet de visualiser le contenu de cette structure avec, notamment, un affichage assez rapide, en une page Html,
 de tous les labels, notamment pour en rechercher un. Il utilise une structuration Php définie dans yamlskos.inc.php.
 
 EuroVoc évolue et il faut pouvoir prendre en compte ces évolutions.  
-Dans les différents fichiers téléchargeables sur la page EuroVoc, eurovoc_in_skos_core_concepts.zip semble le plus
+Dans les différents fichiers téléchargeables sur la [page EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc),
+[eurovoc_in_skos_core_concepts.zip](https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fb868cf85-c47b-11eb-a925-01aa75ed71a1.0001.04%2FDOC_1&fileName=eurovoc_in_skos_core_concepts.zip) semble le plus
 utilisable principalement car il est suffisament petit (53 Mo) pour pouvoir être analysé par EasyRdf, ce qui permet de:
 
   - le convertir en Turtle pour visualiser plus facilement son contenu,
