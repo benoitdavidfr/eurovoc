@@ -1,7 +1,11 @@
 ## EuroVoc
 
 L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation 
-d'**[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc), thésaurus multilingue de l'Union européenne**.  
+d'**[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc), thésaurus multilingue de l'Union européenne**.
+
+L'objectif est de l'utiliser pour indexer les données du guichet d'accès à la donnée de la transition écologique
+et des territoires.
+
 *1er sujet:* son téléchargement et sa structuration pour différentes exploitations,  
 *2ème sujet:* visualisation et recherche d'un concept.
 
