@@ -1,7 +1,7 @@
 ## EuroVoc
 
 L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation 
-d'[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc).  
+d'**[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc), thésaurus multilingue de l'Union européenne**.  
 *1er sujet:* son téléchargement et sa structuration pour différentes exploitations,  
 *2ème sujet:* visualisation et recherche d'un concept.
 
