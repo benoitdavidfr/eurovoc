@@ -7,6 +7,8 @@ doc: |
   Possibilité de cliquer sur un concept pour obtenir un affichage global.
   Un fichier pser est créé qui correspond au fichier eurovoc.yaml sérialisé
 journal: |
+  26/7/2021:
+    - ajout menu de recherche sur motif
   25/7/2021:
     - consultation de la dernière version d'EuroVoc
   22/7/2021:
@@ -37,6 +39,9 @@ else {
 
 if ($action == 'terms') {
   YamlSkos::showTerms($lang, $options);
+}
+elseif ($action == 'search') {
+  YamlSkos::search($lang, $options);
 }
 elseif (isset($_GET['domain'])) {
   //echo "<a href='?lang=$lang'>Revenir à l'ensemble du thésaurus</a><br>\n";

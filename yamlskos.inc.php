@@ -12,6 +12,7 @@ journal: |
   26/7/2021:
     - ajout champ eurovocId aux domaines
     - lien avec les URI
+    - ajout menu de recherche sur motif
   24-25/7/2021:
     - première version
 */
@@ -80,6 +81,7 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
     else
       echo "<a href='?lang=$lang&amp;options=select",($toc ? ",$toc" : ''),"'>Afficher uniquement les domaines d'intérêt</a><br>\n";
     echo "<a href='?lang=$lang&amp;action=terms'>Afficher les étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
+    echo "<a href='?lang=$lang&amp;action=search'>Rechercher les termes en fonction d'un motif</a><br>\n";
 
     echo "<h1><a href='http://publications.europa.eu/resource/dataset/eurovoc'>",self::$titles[$lang],"</a></h1>\n";
     echo "version: ",self::$issued,"</p>\n";
@@ -131,6 +133,35 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
           echo "<a href='?concept=$id'>$prefLabel</a> ";
         }
         echo "<br>\n";
+      }
+    }
+  }
+
+  // affichage d'une page de recherche des termes au moyen d'un motif REGEXP
+  static function search(string $lang, array $options): void {
+    echo "<a href='?lang=$_GET[lang]'>Retour au thésaurus</a>\n";
+    $q = $_GET['q'] ?? '';
+    echo "<table border=1>
+      <tr><form>
+        <td>
+          <input type='hidden' name='action' value='search'/>
+          <input type='hidden' name='lang' value='$_GET[lang]'/>
+          <input type='text' size=130 name='q' value='",htmlspecialchars($q, ENT_QUOTES),"'/>
+        </td>
+        <td>
+          <input type='submit' value='Search'>
+        </td>
+      </form></tr>
+    </table>";
+    if (!$q) return;
+    foreach (self::$concepts as $id => $concept) {
+      if (preg_match("!$_GET[q]!", $concept->prefLabel($_GET['lang'])))
+        echo "",$concept->prefLabelWithLink($_GET['lang']),"<br>\n";
+    }
+    foreach (self::$concepts as $id => $concept) {
+      foreach ($concept->altLabels($lang) as $altLabel) {
+        if (preg_match("!$_GET[q]!", $altLabel))
+          echo "$altLabel -> ",$concept->prefLabelWithLink($_GET['lang']),"<br>\n";
       }
     }
   }
@@ -268,8 +299,10 @@ class Concept {
   function showFull(string $lang) {
     echo "<h2><a href='http://eurovoc.europa.eu/$this->id'>",$this->yaml['prefLabel'][$lang],"</a></h2>\n";
     $yaml = $this->yaml;
-    foreach ($yaml['inScheme'] as $i => $scheme)
-      $yaml['inScheme'][$i] = YamlSkos::$schemes[$scheme]->label($lang)."\n";
+    foreach (['inScheme','topConceptOf'] as $link) {
+      foreach ($yaml[$link] as $i => $scheme)
+        $yaml[$link][$i] = YamlSkos::$schemes[$scheme]->label($lang)."\n";
+    }
     foreach (['broader','narrower','related'] as $link) {
       if (isset($yaml[$link])) {
         foreach ($yaml[$link] as $i => $id)
