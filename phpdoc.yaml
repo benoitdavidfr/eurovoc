@@ -37,7 +37,9 @@ doc: |
   Projet Github à https://github.com/benoitdavidfr/eurovoc
 
   A FAIRE:
+    - utiliser la méthode d'affichage de YamlDoc à la place de yaml::dump()
     - définir le site sur internet avec URI de remplacement
+    - API de recherche d'un terme sur un pattern ?
 journal: |
   24/7/2021:
     - conception de skosrdf.php

@@ -38,9 +38,13 @@ else {
 if ($action == 'terms') {
   YamlSkos::showTerms($lang, $options);
 }
+elseif (isset($_GET['domain'])) {
+  //echo "<a href='?lang=$lang'>Revenir à l'ensemble du thésaurus</a><br>\n";
+  YamlSkos::$domains[$_GET['domain']]->show($lang, array_merge($options,['domain']));
+}
 elseif (isset($_GET['scheme'])) {
-  echo "<a href='?lang=$lang'>Revenir à l'ensemble du thésaurus</a><br>\n";
-  YamlSkos::$schemes[$_GET['scheme']]->show($lang, $options);
+  //echo "<a href='?lang=$lang'>Revenir à l'ensemble du thésaurus</a><br>\n";
+  YamlSkos::$schemes[$_GET['scheme']]->show($lang, array_merge($options,['scheme']));
 }
 elseif (isset($_GET['concept']))
   YamlSkos::$concepts[$_GET['concept']]->showFull($lang);

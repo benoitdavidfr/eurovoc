@@ -13,126 +13,147 @@ domains:
       fr: '04 VIE POLITIQUE'
     notation:
       - 4
+    eurovocId: 100142
   8:
     prefLabel:
       en: '08 INTERNATIONAL RELATIONS'
       fr: '08 RELATIONS INTERNATIONALES'
     notation:
       - 8
+    eurovocId: 100143
   10:
     prefLabel:
       en: '10 EUROPEAN UNION'
       fr: '10 UNION EUROPÉENNE'
     notation:
       - 10
+    eurovocId: 100144
   12:
     prefLabel:
       en: '12 LAW'
       fr: '12 DROIT'
     notation:
       - 12
+    eurovocId: 100145
   16:
     prefLabel:
       en: '16 ECONOMICS'
       fr: '16 ÉCONOMIE'
     notation:
       - 16
+    eurovocId: 100146
   20:
     prefLabel:
       en: '20 TRADE'
       fr: '20 ÉCHANGES ÉCONOMIQUES ET COMMERCIAUX'
     notation:
       - 20
+    eurovocId: 100147
   24:
     prefLabel:
       en: '24 FINANCE'
       fr: '24 FINANCES'
     notation:
       - 24
+    eurovocId: 100148
   28:
     prefLabel:
       en: '28 SOCIAL QUESTIONS'
       fr: '28 QUESTIONS SOCIALES'
     notation:
       - 28
+    eurovocId: 100149
   32:
     prefLabel:
       en: '32 EDUCATION AND COMMUNICATIONS'
       fr: '32 ÉDUCATION ET COMMUNICATION'
     notation:
       - 32
+    eurovocId: 100150
   36:
     prefLabel:
       en: '36 SCIENCE'
       fr: '36 SCIENCES'
     notation:
       - 36
+    eurovocId: 100151
   40:
     prefLabel:
       en: '40 BUSINESS AND COMPETITION'
       fr: '40 ENTREPRISE ET CONCURRENCE'
     notation:
       - 40
+    eurovocId: 100152
   44:
     prefLabel:
       en: '44 EMPLOYMENT AND WORKING CONDITIONS'
       fr: '44 EMPLOI ET TRAVAIL'
     notation:
       - 44
+    eurovocId: 100153
   48:
     prefLabel:
       en: '48 TRANSPORT'
       fr: '48 TRANSPORTS'
     notation:
       - 48
+    eurovocId: 100154
   52:
     prefLabel:
       en: '52 ENVIRONMENT'
       fr: '52 ENVIRONNEMENT'
     notation:
       - 52
+    eurovocId: 100155
   56:
     prefLabel:
       en: '56 AGRICULTURE, FORESTRY AND FISHERIES'
       fr: '56 AGRICULTURE, SYLVICULTURE ET PÊCHE'
     notation:
       - 56
+    eurovocId: 100156
   60:
     prefLabel:
       en: '60 AGRI-FOODSTUFFS'
       fr: '60 AGRO-ALIMENTAIRE'
     notation:
       - 60
+    eurovocId: 100157
   64:
     prefLabel:
       en: '64 PRODUCTION, TECHNOLOGY AND RESEARCH'
       fr: '64 PRODUCTION, TECHNOLOGIE ET RECHERCHE'
     notation:
       - 64
+    eurovocId: 100158
   66:
     prefLabel:
       en: '66 ENERGY'
       fr: '66 ÉNERGIE'
     notation:
       - 66
+    eurovocId: 100159
   68:
     prefLabel:
       en: '68 INDUSTRY'
       fr: '68 INDUSTRIE'
     notation:
       - 68
+    eurovocId: 100160
   72:
     prefLabel:
       en: '72 GEOGRAPHY'
       fr: '72 GÉOGRAPHIE'
     notation:
       - 72
+    eurovocId: 100161
   76:
     prefLabel:
       en: '76 INTERNATIONAL ORGANISATIONS'
       fr: '76 ORGANISATIONS INTERNATIONALES'
     notation:
       - 76
+    eurovocId: 100162
 schemes:
   100141:
     domain: 0

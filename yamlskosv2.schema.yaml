@@ -1,6 +1,6 @@
 $schema: http://json-schema.org/draft-07/schema#
 title: Schema d'un YamlSkos multi-lingue (V2) définissant un thésaurus multi-lingue organisé en domaines et micro-thésaurus
-modified: '2021-07-24'
+modified: 2021-07-26
 description: |
   un document YamlSkos V2 contient un thésaurus organisé en micro-thésaurus (Scheme), chacun contenant des concepts.
   Les micro-thésaurus sont eux-mêmes organisés en domaines.
@@ -51,17 +51,21 @@ properties:
   $schema:
     const: yamlskosv2
   domains:
-    description: dictionnaire des domaines
+    description: dictionnaire des domaines, indexé sur le no défini par les 2 premiers caractères du prefLabel
     type: object
     additionalProperties: false
     patternProperties:
       '^[0-9]+$':
         type: object
         additionalProperties: false
+        required: [prefLabel, eurovocId, notation]
         properties:
           prefLabel:
             description: forme lexicale préférentielle, multi-lingue, une seule par langue
             $ref: '#/definitions/mulString'
+          eurovocId:
+            description: l'identifiant EuroVoc d'origine remplacé par le numéro
+            type: number
           notation:
             description: utilisé dans EuroVoc
             type: array

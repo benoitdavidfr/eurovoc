@@ -302,10 +302,11 @@ if ($option == 'yamlskos') { // génération d'un fichier YamlSkos
       }
       if ($concept['inScheme'][0] == 'domains') { // Les concepts du scheme domains sont des domaines et pas des concepts
         //echo Yaml::dump(['concepts'=> [$id => $concept]], 4, 2);
-        $id = (int)substr($concept['prefLabel']['fr'], 0, 2); // les 2 premiers caractères forment le numéro et id du doamine
-        $yamlSkos['domains'][$id] = [
+        $did = (int)substr($concept['prefLabel']['fr'], 0, 2); // les 2 premiers caractères forment le numéro du doamine
+        $yamlSkos['domains'][$did] = [
           'prefLabel'=> $concept['prefLabel'],
           'notation'=> $concept['notation'],
+          'eurovocId'=> $id,
         ];
       }
       else // autre concept

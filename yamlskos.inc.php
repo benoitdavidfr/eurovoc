@@ -9,9 +9,14 @@ doc: |
     - 'toc' permet de n'afficher que la table des matières, cad les labels des domaines et des schemes
     - 'select' permet de restreindre l'affichage àa la liste des domaines d'intérêt définie en constante
 journal: |
+  26/7/2021:
+    - ajout champ eurovocId aux domaines
+    - lien avec les URI
   24-25/7/2021:
-    première version
+    - première version
 */
+require_once __DIR__.'/showyaml.inc.php';
+
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -58,25 +63,26 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
   }
   
   static function show(string $lang, array $options): void { // affichage d'un menu langue et options puis de la structure
-    echo "<h1>",self::$titles[$lang],"</h1>\n";
-    echo "version: ",self::$issued,"</p>\n";
     // Menu d'affichage des autres langues
     foreach (self::LANGS as $l => $label) {
       if ($l <> $lang)
-        echo "<a href='?lang=$l&amp;options=",implode(',',$options),"'>Affichage en $label</a><br>\n";
+        echo "<a href='?lang=$l&amp;options=",implode(',',$options),"'>Afficher en $label</a><br>\n";
     }
     $toc = in_array('toc', $options) ? 'toc' : '';
     $select = in_array('select', $options) ? 'select' : '';
     // Menu affichage contenu/toc
     if ($toc)
-      echo "<a href='?lang=$lang&amp;options=$select'>Affichage du contenu</a><br>\n";
+      echo "<a href='?lang=$lang&amp;options=$select'>Afficher les concepts</a><br>\n";
     else
-      echo "<a href='?lang=$lang&amp;options=toc",($select ? ",$select" : ''),"'>Affichage uniquement des étiquettes des domaines et micro-thésaurus</a><br>\n";
+      echo "<a href='?lang=$lang&amp;options=toc",($select ? ",$select" : ''),"'>Afficher la liste des micro-thésaurus</a><br>\n";
     if ($select)
-      echo "<a href='?lang=$lang&amp;options=$toc'>Affichage de tous les domaines</a><br>\n";
+      echo "<a href='?lang=$lang&amp;options=$toc'>Afficher tous les domaines</a><br>\n";
     else
-      echo "<a href='?lang=$lang&amp;options=select",($toc ? ",$toc" : ''),"'>Affichage uniquement des domaines d'intérêt</a><br>\n";
-    echo "<a href='?lang=$lang&amp;action=terms'>Affichage des étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
+      echo "<a href='?lang=$lang&amp;options=select",($toc ? ",$toc" : ''),"'>Afficher uniquement les domaines d'intérêt</a><br>\n";
+    echo "<a href='?lang=$lang&amp;action=terms'>Afficher les étiquettes préférentielles et synonymes par ordre alphabétique</a><br>\n";
+
+    echo "<h1><a href='http://publications.europa.eu/resource/dataset/eurovoc'>",self::$titles[$lang],"</a></h1>\n";
+    echo "version: ",self::$issued,"</p>\n";
     foreach (self::$domains as $did => $domain) {
       $domain->show($lang, $options);
     }
@@ -131,20 +137,36 @@ class YamlSkos { // classe statique permettant de créer la structure à partir 
 };
 
 class Domain { // 1er niveau de la structuration, il y a 21 domaines
+  protected string $id; // identifiant
   protected array $prefLabels; // dict. de prefLabel indexé par la langue
+  protected int $eurovocId;
   public array $schemes=[]; // Liste des schemes appartenant au domaine
   
   function __construct(string $did, array $yaml) {
+    $this->id = $did;
     $this->prefLabels = $yaml['prefLabel'];
+    $this->eurovocId = $yaml['eurovocId'];
   }
   
+  // 3 cas d'utilisation
+  // 1) affichage à partir du niveau domain <=> in_array('domain', $options)
+  // 2) affichage toc <=> in_array('toc', $options)
+  // 3) affichage comme partie d'un tout plus grand
   function show(string $lang, array $options) {
     //print_r($this);
+    if (in_array('domain', $options)) {
+      echo "<a href='?lang=$lang'>Remonter au thésaurus</a><br>\n";
+      echo "<h2><a href='http://eurovoc.europa.eu/$this->eurovocId'>",$this->prefLabels[$lang],"</a></h2>\n";
+    }
+    elseif (in_array('toc', $options))
+      echo "<b>",$this->prefLabels[$lang],"</b><br>\n";
+    else {
+      echo "<h2><a href='?lang=$lang&amp;domain=$this->id'>",$this->prefLabels[$lang],"</a></h2>\n";
+    }
     if (in_array('select', $options) && !in_array($this->prefLabels['fr'], YamlSkos::DOMAINS_OF_INTEREST)) {
       //echo "<h2>NOT ",$this->prefLabels[$lang],"</h2>\n";
       return;
     }
-    echo "<h2>",$this->prefLabels[$lang],"</h2>\n";
     foreach ($this->schemes as $scheme) {
       $scheme->show($lang, $options);
     }
@@ -178,9 +200,26 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
     return "<a href='?lang=$lang&amp;scheme=$this->id'>".$this->prefLabels[$lang]."</a>";
   }
 
+  // 3 cas d'utilisation
+  // 1) affichage à partir du niveau scheme <=> in_array('scheme', $options)
+  // 2) affichage toc <=> in_array('toc', $options)
+  // 3) affichage comme partie d'un tout plus grand
   function show(string $lang, array $options) {
-    echo "<h3><a href='?lang=$lang&amp;scheme=$this->id'>",$this->prefLabels[$lang],"</a></h3>\n";
-    if (in_array('toc', $options)) return;
+    if (in_array('scheme', $options)) {
+      // Affichage du lien vers le domaine ou à défaut vers le thésaurus
+      if ($this->domain)
+        echo "<a href='?lang=$lang&amp;domain=",$this->domain,"'>Remonter au domaine</a><br>\n";
+      else
+        echo "<a href='?lang=$lang'>Remonter au thésaurus</a><br>\n";
+      echo "<h3><a href='http://eurovoc.europa.eu/$this->id'>",$this->prefLabels[$lang],"</a></h3>\n";
+    }
+    elseif (in_array('toc', $options)) {
+      echo "&nbsp;&nbsp;<a href='?lang=$lang&amp;scheme=$this->id'>",$this->prefLabels[$lang],"</a><br>\n";
+      return;
+    }
+    else {
+      echo "<h3><a href='?lang=$lang&amp;scheme=$this->id'>",$this->prefLabels[$lang],"</a></h3>\n";
+    }
     echo "<ul>\n";
     foreach ($this->hasTopConcept as $cId) {
       YamlSkos::$concepts[$cId]->showLabels($lang);
@@ -192,51 +231,30 @@ class Scheme { // 2ème niveau de la structuration, contient les concepts
 
 class Concept {
   protected string $id; // identifiant
-  protected array $inSchemes; // liste d'identifiant de schemes
-  protected array $prefLabels; // dict. de prefLabel indexé par la langue
-  protected array $altLabels; // dict. de listes de altLabels indexé par la langue
-  protected array $definitions; // dict. de listes de definitions indexé par la langue
-  protected array $scopeNotes; // dict. de listes de scopeNotes indexé par la langue
-  protected array $editorialNotes; // dict. de listes de editorialNotes indexé par la langue
-  protected array $changeNotes; // dict. de listes de changeNote indexé par la langue
-  protected array $historyNotes; // dict. de listes de historyNotes indexé par la langue
-  protected array $broaders; // liste des id des concepts plus généraux
-  protected array $narrowers; // liste des id des concepts plus étroits
-  protected array $related; // liste des id des concepts en relation
-  protected array $yaml; // structure SkosYaml initiale pour mise au point
+  protected array $yaml; // structure SkosYaml
   
   function __construct(string $id, array $yaml) {
     $this->id = $id;
-    $this->inSchemes = $yaml['inScheme'];
-    $this->prefLabels = $yaml['prefLabel'];
-    $this->altLabels = $yaml['altLabel'] ?? [];
-    $this->definitions = $yaml['definition'] ?? [];
-    $this->scopeNotes = $yaml['scopeNote'] ?? [];
-    $this->editorialNotes = $yaml['editorialNote'] ?? [];
-    $this->changeNotes = $yaml['changeNote'] ?? [];
-    $this->historyNotes = $yaml['historyNote'] ?? [];
-    $this->broaders = $yaml['broader'] ?? [];
-    $this->narrowers = $yaml['narrower'] ?? [];
-    $this->related = $yaml['related'] ?? [];
+    unset($yaml['notation']);
     $this->yaml = $yaml;
   }
   
-  function prefLabel(string $lang): string { return $this->prefLabels[$lang]; }
+  function prefLabel(string $lang): string { return $this->yaml['prefLabel'][$lang]; }
   
-  function altLabels(string $lang): array { return $this->altLabels[$lang] ?? []; }
+  function altLabels(string $lang): array { return $this->yaml['altLabel'][$lang] ?? []; }
   
   // retourne l'étiquette dans la langue avec possibilité de naviguer sur le concept
   function prefLabelWithLink(string $lang): string {
-    return "<a href='?lang=$lang&amp;concept=$this->id'>".$this->prefLabels[$lang]."</a>";
+    return "<a href='?lang=$lang&amp;concept=$this->id'>".$this->yaml['prefLabel'][$lang]."</a>";
   }
   
   // affiche une arborescence HTML des labels dans la langue avec possibilité de naviguer sur le concept
   function showLabels(string $lang): void {
     echo "<li>",$this->prefLabelWithLink($lang),"</li>\n";
     //print_r($this);
-    if ($this->narrowers) {
+    if (isset($this->yaml['narrower'])) {
       echo "<ul>\n";
-      foreach ($this->narrowers as $narrower) {
+      foreach ($this->yaml['narrower'] as $narrower) {
         if (!isset(YamlSkos::$concepts[$narrower]))
           echo "<li>NARROWER $narrower incorrect</li>\n";
         else
@@ -248,38 +266,18 @@ class Concept {
   
   // afffiche le concept complet
   function showFull(string $lang) {
-    echo "<h2>",$this->prefLabels[$lang],"</h2><pre>\n";
-    echo "inScheme:\n";
-    foreach ($this->inSchemes as $scheme)
-      echo '  - ',YamlSkos::$schemes[$scheme]->label($lang),"\n";
-    echo Yaml::dump(['prefLabel'=> $this->prefLabels], 3, 2);
-    if ($this->altLabels)
-      echo Yaml::dump(['altLabel'=> $this->altLabels], 3, 2);
-    if ($this->definitions)
-      echo Yaml::dump(['definition'=> $this->definitions], 3, 2);
-    if ($this->scopeNotes)
-      echo Yaml::dump(['scopeNote'=> $this->scopeNotes], 3, 2);
-    if ($this->editorialNotes)
-      echo Yaml::dump(['editorialNote'=> $this->editorialNotes], 3, 2);
-    if ($this->changeNotes)
-      echo Yaml::dump(['changeNote'=> $this->changeNotes], 3, 2);
-    if ($this->historyNotes)
-      echo Yaml::dump(['historyNote'=> $this->historyNotes], 3, 2);
-    if ($this->broaders) {
-      echo "boader:\n";
-      foreach ($this->broaders as $broader)
-        echo '  - ',YamlSkos::$concepts[$broader]->prefLabelWithLink($lang),"\n";
+    echo "<h2><a href='http://eurovoc.europa.eu/$this->id'>",$this->yaml['prefLabel'][$lang],"</a></h2>\n";
+    $yaml = $this->yaml;
+    foreach ($yaml['inScheme'] as $i => $scheme)
+      $yaml['inScheme'][$i] = YamlSkos::$schemes[$scheme]->label($lang)."\n";
+    foreach (['broader','narrower','related'] as $link) {
+      if (isset($yaml[$link])) {
+        foreach ($yaml[$link] as $i => $id)
+          $yaml[$link][$i] = YamlSkos::$concepts[$id]->prefLabelWithLink($lang)."\n";
+      }
     }
-    if ($this->narrowers) {
-      echo "narrower:\n";
-      foreach ($this->narrowers as $narrower)
-        echo '  - ',YamlSkos::$concepts[$narrower]->prefLabelWithLink($lang),"\n";
-    }
-    if ($this->related) {
-      echo "retated:\n";
-      foreach ($this->related as $related)
-        echo '  - ',YamlSkos::$concepts[$related]->prefLabelWithLink($lang),"\n";
-    }
+    showYaml($yaml);
+    
     //echo "\n"; print_r($this); echo "</pre>\n";
   }
 };
