@@ -1,4 +1,4 @@
-## Utilisation d'EuroVoc, thésaurus multilingue de l'Union européenne
+## Utilisation d'EuroVoc, le thésaurus multilingue de l'Union européenne
 
 L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation 
 d'[EuroVoc, le thésaurus multilingue de l'Union 
@@ -6,12 +6,11 @@ européenne](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=
 notamment pour indexer les jeux de données du guichet d'accès à la donnée de la transition écologique et des territoires.
 
 Pour cela le thésaurus a été téléchargé depuis la 
-[page EuroVoc
-](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc).
-Dans les différents fichiers téléchargeables, le fichier
+[page EuroVoc de
+l'UE](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc).
+Parmi les différents fichiers téléchargeables, le fichier
 [eurovoc_in_skos_core_concepts.zip](https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fb868cf85-c47b-11eb-a925-01aa75ed71a1.0001.04%2FDOC_1&fileName=eurovoc_in_skos_core_concepts.zip)
-semble le plus utilisable principalement en raison de sa taille limitée (53 Mo)
-pour pouvoir être analysé par EasyRdf.
+a été choisi principalement en raison de sa taille limitée (53 Mo) pour pouvoir être analysé par EasyRdf.
 Cela permet de:
   - le convertir en Turtle pour visualiser plus facilement son contenu,
   - le sérialiser en Php pour l'utiliser en Php,
