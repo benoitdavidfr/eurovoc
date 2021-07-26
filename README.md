@@ -1,32 +1,28 @@
-## EuroVoc, thésaurus multilingue de l'Union européenne
+## Utilisation d'EuroVoc, thésaurus multilingue de l'Union européenne
 
 L'objectif de ce projet est de faciliter la visualisation, la compréhension et l'utilisation 
-d'[EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc),
-notamment pour indexer les données du guichet d'accès à la donnée de la transition écologique et des territoires.
+d'[EuroVoc, le thésaurus multilingue de l'Union 
+européenne](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc),
+notamment pour indexer les jeux de données du guichet d'accès à la donnée de la transition écologique et des territoires.
 
-*1er sujet:* son téléchargement et sa structuration pour différentes exploitations,  
-*2ème sujet:* visualisation et recherche d'un concept.
-
-Pour stocker EuroVoc, utilisation d'une structure simplifiée en Yaml, appelée YamlSkosV2, définie
-par [un schéma JSON](yamlskosv2.schema.yaml).
-Le fichier [eurovoc.yaml](eurovoc.yaml) contient EuroVoc et respecte ce schéma.
-
-index.php permet de visualiser le contenu de ce fichier avec, notamment, un affichage assez rapide, en une page Html,
-de tous les labels, notamment pour en rechercher un.
-Il utilise une structuration Php définie dans yamlskos.inc.php.
-
-Cette visualisation est accessible sur https://georef.eu/eurovoc/
-
-EuroVoc évolue et il faut pouvoir prendre en compte ces évolutions.  
-Dans les différents fichiers téléchargeables sur la [page EuroVoc](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc),
-[eurovoc_in_skos_core_concepts.zip](https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fb868cf85-c47b-11eb-a925-01aa75ed71a1.0001.04%2FDOC_1&fileName=eurovoc_in_skos_core_concepts.zip) semble le plus
-utilisable principalement car il est suffisament petit (53 Mo) pour pouvoir être analysé par EasyRdf, ce qui permet de:
-
+Pour cela le thésaurus a été téléchargé depuis la 
+[page EuroVoc
+](https://op.europa.eu/fr/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/eurovoc).
+Dans les différents fichiers téléchargeables, le fichier
+[eurovoc_in_skos_core_concepts.zip](https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fb868cf85-c47b-11eb-a925-01aa75ed71a1.0001.04%2FDOC_1&fileName=eurovoc_in_skos_core_concepts.zip)
+semble le plus utilisable principalement en raison de sa taille limitée (53 Mo)
+pour pouvoir être analysé par EasyRdf.
+Cela permet de:
   - le convertir en Turtle pour visualiser plus facilement son contenu,
   - le sérialiser en Php pour l'utiliser en Php,
   - supprimer les langues autres que 'fr' et 'en' pour l'alléger
 
-skosrdf.php permet de consulter ce fichier RDF et de le convertir en un fichier YamlSkosV2.
+Une fois téléchargé, le thésaurus a été  transformé, en utilisant le script [skosrdf.php](skosrdf.php),
+dans une structuration, appelée YamlSkosV2, définie par [un schéma JSON](yamlskosv2.schema.yaml).
+Le résultat est stocké dans le fichier [eurovoc.yaml](eurovoc.yaml).
+ 
+EuroVoc peut ainsi être visualisé sur https://georef.eu/eurovoc/ avec, notamment, un affichage assez rapide,
+en une page Html, de tous les labels préférentiels, notamment pour en rechercher un.
 
 Le module utilise:
 
